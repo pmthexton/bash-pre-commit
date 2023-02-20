@@ -1,0 +1,51 @@
+#!/bin/bash
+
+error() {
+>&2 cat <<EOF
+Please ensure the first line of your commit message conforms to the
+conventional commit format
+This typically takes the folowing form (sections within [] are optional)
+
+type[(area)][!]: description
+
+Examples:
+
+== Adding a new feature
+feat: Adding super new feature
+== Adding a new feature, that breaks backward compatibility
+feat!: Adding a new feature, may break things, sorry
+== Adding a fix to parser feature
+fix(parser): Fixing bug found by customer
+== Adding a fix to parser feature, that breaks backward compatibility
+fix(parser)!: Fixing bug, breaks backward compatibility
+EOF
+}
+trap error ERR
+msg=$(<$1)
+
+echo "Checking [$msg]"
+
+regex='^(\w*)(\(([^\)]+)\))?(\!)?\: (.+)$'
+
+standardTypes=(build
+    chore
+    ci
+    docs
+    feat
+    fix
+    perf
+    refactor
+    revert
+    style
+    test)
+
+verbs=$(IFS='|'; echo "${standardTypes[*]}")
+
+if [[ "${msg}" =~ ^(${verbs}){1}(\([[:alnum:][:space:]._-]+\))?(!)?:\ (.*) ]]
+then
+    if ! [[ "${verbs[*]}" =~ "${BASH_REMATCH[1]}" ]]; then
+        >&2 echo "Unrecognised type [${BASH_REMATCH[1]}] specified"
+    fi
+else
+    false
+fi

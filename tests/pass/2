@@ -1,0 +1,4 @@
+feat: remove ticket list endpoint
+
+refers to JIRA-1337
+BREAKING CHANGES: ticket enpoints no longer supports list all entites.
